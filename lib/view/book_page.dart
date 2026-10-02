@@ -1,34 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:biblioteca/service/giphy_service.dart';
+import 'package:biblioteca/view/gif_page.dart';
+import 'package:biblioteca/view/author_page.dart';
 
-class BookPage extends StatefulWidget {
+class BookPage extends StatelessWidget {
   const BookPage(this.livro, {super.key});
 
   final Map<String, dynamic> livro;
 
   @override
-  State<BookPage> createState() => _BookPageState();
-}
-
-class _BookPageState extends State<BookPage> {
-  final apiService = GiphyService();
-  int _offset = 0;
-  int _totalGifs = 0;
-  Future<Map<String, dynamic>>? _pesquisaGif;
-
-  void _outroGif() {
-    setState(() {
-      _offset += 1;
-      if ((_totalGifs > 0 && _offset >= _totalGifs) || _offset > 4999) {
-        _offset = 0;
-      }
-      _pesquisaGif = null;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final livro = widget.livro;
     final List autores = livro['author_name'] ?? [];
     final String autor = autores.isEmpty
         ? 'Autor não informado'
@@ -85,86 +65,33 @@ class _BookPageState extends State<BookPage> {
               const SizedBox(height: 8),
               Text('Primeira publicação: $ano', textAlign: TextAlign.center),
               const SizedBox(height: 24),
-              const Text(
-                'GIF relacionado',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => GifPage(livro)),
+                  );
+                },
+                child: const Text('Ver GIF relacionado'),
               ),
               const SizedBox(height: 12),
-              FutureBuilder<Map<String, dynamic>>(
-                future: _pesquisaGif ??= apiService.buscaGif(
-                  widget.livro['title'] ?? '',
-                  _offset,
-                ),
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                    case ConnectionState.none:
-                      return const SizedBox(
-                        height: 240,
-                        child: Center(child: CircularProgressIndicator()),
-                      );
-                    default:
-                      if (snapshot.hasError) {
-                        return const SizedBox(
-                          height: 240,
-                          child: Center(
-                            child: Text('Não foi possível carregar o GIF.'),
-                          ),
-                        );
-                      } else {
-                        return exibeResultado(context, snapshot);
-                      }
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: _outroGif,
-                child: const Text('Outro GIF'),
+                onPressed: () {
+                  final String primeiroAutor = autores.isEmpty
+                      ? 'Autor não informado'
+                      : autores[0];
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => AuthorPage(primeiroAutor),
+                    ),
+                  );
+                },
+                child: const Text('Ver livros do autor'),
               ),
-              const SizedBox(height: 8),
-              const Text('Powered by GIPHY', textAlign: TextAlign.center),
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  Widget exibeResultado(
-    BuildContext context,
-    AsyncSnapshot<Map<String, dynamic>> snapshot,
-  ) {
-    final List gifs = snapshot.data?['data'] ?? [];
-    _totalGifs = snapshot.data?['pagination']?['total_count'] ?? 0;
-    if (gifs.isEmpty) {
-      return const SizedBox(
-        height: 240,
-        child: Center(child: Text('Nenhum GIF relacionado encontrado.')),
-      );
-    }
-    final String? url = gifs[0]['images']?['fixed_height']?['url'];
-    if (url == null || url.isEmpty) {
-      return const SizedBox(
-        height: 240,
-        child: Center(child: Text('Nenhum GIF relacionado encontrado.')),
-      );
-    }
-    return Image.network(
-      url,
-      height: 240,
-      fit: BoxFit.contain,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return const SizedBox(
-          height: 240,
-          child: Center(child: CircularProgressIndicator()),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) => const SizedBox(
-        height: 240,
-        child: Center(child: Text('Não foi possível carregar o GIF.')),
       ),
     );
   }

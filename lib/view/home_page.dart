@@ -104,7 +104,7 @@ class _HomePageState extends State<HomePage> {
                 child: _termo.isEmpty
                     ? const Center(
                         child: Text(
-                          'Pesquise livros e toque em um resultado para ver um GIF relacionado.',
+                          'Pesquise livros e use Ver detalhes para abrir um resultado.',
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -159,55 +159,59 @@ class _HomePageState extends State<HomePage> {
         final String ano =
             livro['first_publish_year']?.toString() ?? 'Ano não informado';
         final capa = livro['cover_i'];
-        return GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => BookPage(livro)),
-            );
-          },
-          child: Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 65,
-                    height: 95,
-                    child: capa == null
-                        ? const Icon(Icons.book, size: 48, color: Colors.brown)
-                        : Image.network(
-                            'https://covers.openlibrary.org/b/id/$capa-M.jpg?default=false',
-                            fit: BoxFit.contain,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.book,
-                                  size: 48,
-                                  color: Colors.brown,
-                                ),
-                          ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          livro['title'] ?? 'Título não informado',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 65,
+                  height: 95,
+                  child: capa == null
+                      ? const Icon(Icons.book, size: 48, color: Colors.brown)
+                      : Image.network(
+                          'https://covers.openlibrary.org/b/id/$capa-M.jpg?default=false',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(
+                                Icons.book,
+                                size: 48,
+                                color: Colors.brown,
+                              ),
                         ),
-                        const SizedBox(height: 6),
-                        Text(autor),
-                        const SizedBox(height: 4),
-                        Text(ano),
-                      ],
-                    ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        livro['title'] ?? 'Título não informado',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(autor),
+                      const SizedBox(height: 4),
+                      Text(ano),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BookPage(livro),
+                            ),
+                          );
+                        },
+                        child: const Text('Ver detalhes'),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         );
